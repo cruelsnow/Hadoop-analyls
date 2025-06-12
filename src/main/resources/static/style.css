@@ -1,0 +1,268 @@
+:root {
+    --primary-color: #4361ee;
+    --secondary-color: #3f37c9;
+    --accent-color: #4895ef;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    --success-color: #4cc9f0;
+    --warning-color: #f72585;
+    --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    --transition: all 0.3s ease;
+}
+
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--dark-color);
+    padding-bottom: 2rem;
+}
+
+.header {
+    background: linear-gradient(120deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 1.5rem 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 1.8rem;
+}
+
+.logo i {
+    font-size: 2.2rem;
+    color: #4cc9f0;
+}
+
+.card {
+    border-radius: 16px;
+    border: none;
+    box-shadow: var(--card-shadow);
+    transition: var(--transition);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background: linear-gradient(120deg, var(--primary-color), var(--accent-color));
+    color: white;
+    font-weight: 600;
+    padding: 1rem 1.5rem;
+    border-radius: 16px 16px 0 0 !important;
+    border: none;
+}
+
+.card-body {
+    padding: 1.8rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 0.5rem;
+}
+
+.form-control, .form-select {
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e0e0e0;
+    transition: var(--transition);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.2);
+}
+
+.btn-primary {
+    background: linear-gradient(120deg, var(--primary-color), var(--secondary-color));
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(120deg, var(--secondary-color), var(--primary-color));
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background: linear-gradient(120deg, #2ec4b6, #20bf6b);
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.btn-success:hover {
+    background: linear-gradient(120deg, #20bf6b, #2ec4b6);
+    transform: translateY(-2px);
+}
+
+.btn-warning {
+    background: linear-gradient(120deg, #ff9e00, #ff5400);
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.btn-warning:hover {
+    background: linear-gradient(120deg, #ff5400, #ff9e00);
+    transform: translateY(-2px);
+}
+
+.section-title {
+    position: relative;
+    margin: 2rem 0 1.5rem;
+    padding-bottom: 0.5rem;
+    font-weight: 700;
+    color: var(--secondary-color);
+}
+
+.section-title:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: var(--accent-color);
+    border-radius: 2px;
+}
+
+.file-input-area {
+    border: 2px dashed #ccc;
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    background-color: rgba(248, 249, 250, 0.6);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.file-input-area:hover {
+    border-color: var(--accent-color);
+    background-color: rgba(67, 97, 238, 0.05);
+}
+
+.file-input-area i {
+    font-size: 3rem;
+    color: var(--accent-color);
+    margin-bottom: 1rem;
+}
+
+.operation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.operation-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.operation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.operation-card i {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.operation-card h5 {
+    font-weight: 700;
+    color: var(--secondary-color);
+}
+
+.progress-container {
+    margin: 1.5rem 0;
+}
+
+.progress {
+    height: 12px;
+    border-radius: 6px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, var(--accent-color), var(--primary-color));
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 600;
+    background-color: rgba(72, 149, 239, 0.15);
+    color: var(--primary-color);
+}
+
+.status-badge i {
+    font-size: 0.9rem;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 3rem;
+    padding: 1rem;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.alert-custom {
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.2rem;
+    }
+
+    .operation-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.file-icon {
+    margin-right: 8px;
+    width: 20px;
+    text-align: center;
+}
+
+.file-item:hover {
+    background-color: #f8f9fa;
+}
+
+.breadcrumb {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+}
