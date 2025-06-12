@@ -1,0 +1,50 @@
+# 应用服务 WEB 访问端口
+server:
+  port: 8080
+  context-path: /thymeleaf
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 150MB
+  # 配置thymeleaf的相关信息
+  thymeleaf:
+    # 开启视图解析
+    enabled: true
+    #编码格式
+    encoding: UTF-8
+    #前缀配置
+    prefix: classpath:/templates/
+    # 后缀配置
+    suffix: .html
+    #是否使用缓存 开发环境时不设置缓存
+    cache: false
+    # 格式为 HTML 格式
+    mode: HTML5
+    # 配置类型
+    servlet:
+      content-type: text/html
+  mvc:
+    static-path-pattern:/**
+
+
+logging:
+  level:
+    root: INFO
+    org:
+      springframework.web: DEBUG
+    com:
+      example: DEBUG
+
+
+#logging:
+#  level:
+#    # 设置你的应用包日志级别（可选）
+#    com.example.bd_2022131094: INFO
+#    # 禁止 Hadoop DEBUG 日志，只保留 ERROR/WARN
+#    org.apache.hadoop: ERROR
+#    org.apache.hadoop.mapreduce: ERROR
+#    org.apache.hadoop.hdfs: ERROR
+#    # 可选：Spring 相关日志级别
+#    org.springframework: INFO

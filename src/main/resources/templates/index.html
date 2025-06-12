@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HDFS 文件管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+            --warning-color: #f72585;
+            --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--dark-color);
+            padding-bottom: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(120deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.8rem;
+        }
+
+        .logo i {
+            font-size: 2.2rem;
+            color: #4cc9f0;
+        }
+
+        .card {
+            border-radius: 16px;
+            border: none;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background: linear-gradient(120deg, var(--primary-color), var(--accent-color));
+            color: white;
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            border-radius: 16px 16px 0 0 !important;
+            border: none;
+        }
+
+        .card-body {
+            padding: 1.8rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e0e0e0;
+            transition: var(--transition);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(120deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(120deg, var(--secondary-color), var(--primary-color));
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(120deg, #2ec4b6, #20bf6b);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(120deg, #20bf6b, #2ec4b6);
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: linear-gradient(120deg, #ff9e00, #ff5400);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(120deg, #ff5400, #ff9e00);
+            transform: translateY(-2px);
+        }
+
+        .section-title {
+            position: relative;
+            margin: 2rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+        }
+
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--accent-color);
+            border-radius: 2px;
+        }
+
+        .file-input-area {
+            border: 2px dashed #ccc;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            background-color: rgba(248, 249, 250, 0.6);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .file-input-area:hover {
+            border-color: var(--accent-color);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .file-input-area i {
+            font-size: 3rem;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+        }
+
+        .operation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .operation-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .operation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .operation-card i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .operation-card h5 {
+            font-weight: 700;
+            color: var(--secondary-color);
+        }
+
+        .progress-container {
+            margin: 1.5rem 0;
+        }
+
+        .progress {
+            height: 12px;
+            border-radius: 6px;
+            background-color: #e9ecef;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--accent-color), var(--primary-color));
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            background-color: rgba(72, 149, 239, 0.15);
+            color: var(--primary-color);
+        }
+
+        .status-badge i {
+            font-size: 0.9rem;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 1rem;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .alert-custom {
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .card-body {
+                padding: 1.2rem;
+            }
+
+            .operation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .file-icon {
+            margin-right: 8px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .file-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .breadcrumb {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+        }
+    </style>
+</head>
+<body>
+<!-- 顶部导航 -->
+<div class="header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="logo">
+                <i class="fas fa-database"></i>
+                <span>HDFS 文件管理系统</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- 快速操作区域 -->
+    <h3 class="section-title">快速操作</h3>
+    <div class="operation-grid">
+        <div class="operation-card" onclick="showUpload()">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <h5>上传文件</h5>
+            <p>上传本地文件到HDFS</p>
+        </div>
+        <div class="operation-card" onclick="showDownload()">
+            <i class="fas fa-cloud-download-alt"></i>
+            <h5>下载文件</h5>
+            <p>从HDFS下载文件到本地</p>
+        </div>
+        <div class="operation-card" onclick="showTrain()">
+            <i class="fas fa-brain"></i>
+            <h5>训练模型</h5>
+            <p>使用HDFS数据训练ML模型</p>
+        </div>
+        <div class="operation-card" onclick="showPredict()">
+            <i class="fas fa-chart-line"></i>
+            <h5>模型预测</h5>
+            <p>使用训练好的模型进行预测</p>
+        </div>
+    </div>
+
+    <!-- 文件上传部分 -->
+    <div class="card" id="uploadSection">
+        <div class="card-header d-flex align-items-center">
+            <i class="fas fa-cloud-upload-alt me-2"></i>
+            上传文件到 HDFS
+        </div>
+        <div class="card-body">
+            <form id="uploadForm" method="post" enctype="multipart/form-data">
+                <div class="mb-4">
+                    <label class="form-label">目标路径</label>
+                    <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-folder"></i>
+                            </span>
+                        <input type="text" name="filePath" class="form-control" value="/dataset" required>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">选择文件</label>
+                    <div class="file-input-area" id="dropArea">
+                        <i class="fas fa-file-upload"></i>
+                        <h5>拖放文件到此处或点击选择</h5>
+                        <p class="text-muted">支持单个文件上传，最大2GB</p>
+                        <input type="file" name="file" class="d-none" id="fileInput" required>
+                    </div>
+                    <div class="mt-2" id="fileName"></div>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-upload me-2"></i>上传文件
+                    </button>
+                </div>
+            </form>
+            <div id="uploadResult" class="mt-4"></div>
+        </div>
+    </div>
+
+    <!-- 文件下载部分 -->
+    <div class="card d-none" id="downloadSection">
+        <div class="card-header d-flex align-items-center">
+            <i class="fas fa-cloud-download-alt me-2"></i>
+            从 HDFS 下载文件
+        </div>
+        <div class="card-body">
+            <div class="mb-4">
+                <label class="form-label">HDFS 文件路径</label>
+                <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-file"></i>
+                        </span>
+                    <input type="text" id="downloadPath" class="form-control" value="/dataset">
+                </div>
+            </div>
+
+            <div class="d-grid">
+                <button class="btn btn-success btn-lg" onclick="downloadFile()">
+                    <i class="fas fa-download me-2"></i>下载文件
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模型训练部分 -->
+    <div class="card d-none" id="trainSection">
+        <div class="card-header d-flex align-items-center">
+            <i class="fas fa-brain me-2"></i>
+            训练机器学习模型
+        </div>
+        <div class="card-body">
+            <div class="mb-4">
+                <label class="form-label">训练集文件路径</label>
+                <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-file-csv"></i>
+                        </span>
+                    <input type="text" id="trainInput" class="form-control" value="/dataset/training_dataset/">
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">输出模型路径</label>
+                <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-cube"></i>
+                        </span>
+                    <input type="text" id="trainOutput" class="form-control" value="/modles/">
+                </div>
+            </div>
+
+            <div class="d-grid">
+                <button class="btn btn-warning btn-lg" onclick="startTraining()">
+                    <i class="fas fa-cogs me-2"></i>开始训练
+                </button>
+            </div>
+
+            <div class="progress-container d-none" id="trainProgress">
+                <div class="d-flex justify-content-between mb-2">
+                    <span>训练进度</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+                <div class="progress">
+                    <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div id="trainResult" class="mt-4"></div>
+        </div>
+    </div>
+
+    <!-- 模型预测部分 -->
+    <div class="card d-none" id="predictSection">
+        <div class="card-header d-flex align-items-center">
+            <i class="fas fa-chart-line me-2"></i>
+            模型预测
+        </div>
+        <div class="card-body">
+            <div class="mb-4">
+                <label class="form-label">模型路径</label>
+                <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-cube"></i>
+                        </span>
+                    <input type="text" id="modelPath" class="form-control" value="/modles/">
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">测试集文件路径</label>
+                <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-file-csv"></i>
+                        </span>
+                    <input type="text" id="predictInput" class="form-control" value="/dataset/test_dataset/">
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">预测结果文件输出路径</label>
+                <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-file-export"></i>
+                        </span>
+                    <input type="text" id="predictOutput" class="form-control" value="/output/">
+                </div>
+            </div>
+
+            <div class="d-grid">
+                <button class="btn btn-success btn-lg" onclick="startPrediction()">
+                    <i class="fas fa-bolt me-2"></i>开始预测
+                </button>
+            </div>
+
+            <div id="predictResult" class="mt-4"></div>
+        </div>
+    </div>
+
+    <!-- 文件浏览器部分 -->
+    <h3 class="section-title">HDFS 文件浏览器</h3>
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="navigateUp()">
+                        <i class="fas fa-arrow-left"></i> 返回上级
+                    </button>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb" id="pathBreadcrumb">
+                            <li class="breadcrumb-item"><a href="#" onclick="loadFileList('/')">根目录</a></li>
+                        </ol>
+                    </nav>
+                </div>
+                <button class="btn btn-sm btn-primary" onclick="refreshFileList()">
+                    <i class="fas fa-sync-alt me-1"></i>刷新
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th><i class="far fa-file"></i> 文件名</th>
+                        <th><i class="far fa-clock"></i> 修改时间</th>
+                        <th><i class="fas fa-weight-hanging"></i> 大小</th>
+                        <th><i class="fas fa-cog"></i> 操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="fileListBody">
+                    <!-- 文件列表将通过JavaScript动态加载 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <div class="container">
+        <p>HDFS 文件管理系统 &copy; 2025 | 基于 Hadoop 的分布式文件系统</p>
+        <p class="text-muted"> 最后更新: <span th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"></span></p>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // 当前路径
+    let currentPath = '/';
+
+    // 初始化
+    $(document).ready(function() {
+        showUpload();
+        loadFileList(currentPath);
+    });
+
+    // 文件选择处理
+    document.getElementById('dropArea').addEventListener('click', () => {
+        document.getElementById('fileInput').click();
+    });
+
+    document.getElementById('fileInput').addEventListener('change', function() {
+        if(this.files.length > 0) {
+            document.getElementById('fileName').innerHTML =
+                `<div class="alert alert-success alert-custom">
+                        <i class="fas fa-check-circle me-2"></i>已选择文件: ${this.files[0].name}
+                    </div>`;
+        }
+    });
+
+    // 拖放功能
+    const dropArea = document.getElementById('dropArea');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight() {
+        dropArea.style.borderColor = '#4361ee';
+        dropArea.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
+    }
+
+    function unhighlight() {
+        dropArea.style.borderColor = '#ccc';
+        dropArea.style.backgroundColor = 'rgba(248, 249, 250, 0.6)';
+    }
+
+    dropArea.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        document.getElementById('fileInput').files = files;
+
+        if(files.length > 0) {
+            document.getElementById('fileName').innerHTML =
+                `<div class="alert alert-success alert-custom">
+                        <i class="fas fa-check-circle me-2"></i>已选择文件: ${files[0].name}
+                    </div>`;
+        }
+    }
+
+    // 操作卡片显示对应部分
+    function showUpload() {
+        $('.card').addClass('d-none');
+        $('#uploadSection').removeClass('d-none');
+        window.scrollTo({top: $('#uploadSection').offset().top - 100, behavior: 'smooth'});
+    }
+
+    function showDownload() {
+        $('.card').addClass('d-none');
+        $('#downloadSection').removeClass('d-none');
+        window.scrollTo({top: $('#downloadSection').offset().top - 100, behavior: 'smooth'});
+    }
+
+    function showTrain() {
+        $('.card').addClass('d-none');
+        $('#trainSection').removeClass('d-none');
+        window.scrollTo({top: $('#trainSection').offset().top - 100, behavior: 'smooth'});
+    }
+
+    function showPredict() {
+        $('.card').addClass('d-none');
+        $('#predictSection').removeClass('d-none');
+        window.scrollTo({top: $('#predictSection').offset().top - 100, behavior: 'smooth'});
+    }
+
+    // 文件下载函数
+    function downloadFile() {
+        const filePath = $("#downloadPath").val();
+        if (!filePath) {
+            alert("请先输入文件路径");
+            return;
+        }
+
+        window.location.href = `/hdfs/download?filePath=${encodeURIComponent(filePath)}`;
+    }
+
+    // 加载文件列表
+    function loadFileList(path) {
+        currentPath = path;
+        updateBreadcrumb(path);
+
+        $.get('/hdfs/mkdirFilePath', { filePath: path }, function(response) {
+            if (response.code === 200) {
+                renderFileList(response.data);
+            } else {
+                $('#fileListBody').html(`
+                        <tr>
+                            <td colspan="4" class="text-center text-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>加载文件列表失败: ${response.msg}
+                            </td>
+                        </tr>
+                    `);
+            }
+        });
+    }
+
+    // 渲染文件列表
+    function renderFileList(files) {
+        let html = '';
+
+        if (files.length === 0) {
+            html = `
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">
+                            <i class="fas fa-folder-open me-2"></i>当前目录为空
+                        </td>
+                    </tr>
+                `;
+        } else {
+            files.forEach(file => {
+                const isDirectory = file.type === 'DIRECTORY';
+                const icon = isDirectory ?
+                    '<i class="fas fa-folder text-warning"></i>' :
+                    '<i class="fas fa-file text-primary"></i>';
+
+                const size = file.size ? formatFileSize(file.size) : '-';
+
+                html += `
+                        <tr class="file-item">
+                            <td>
+                                <span class="file-icon">${icon}</span>
+                                ${file.pathSuffix}
+                            </td>
+                            <td>${file.modificationTime ? new Date(file.modificationTime).toLocaleString() : '-'}</td>
+                            <td>${size}</td>
+                            <td>
+                                ${isDirectory ?
+                    `<button class="btn btn-sm btn-outline-primary me-1"
+                                        onclick="loadFileList('${currentPath}/${file.pathSuffix}')">
+                                        <i class="fas fa-folder-open me-1"></i>浏览
+                                    </button>` :
+                    `<button class="btn btn-sm btn-outline-success me-1"
+                                        onclick="downloadFileFromList('${currentPath}/${file.pathSuffix}')">
+                                        <i class="fas fa-download me-1"></i>下载
+                                    </button>`
+                }
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash me-1"></i>删除
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+            });
+        }
+
+        $('#fileListBody').html(html);
+    }
+
+    // 更新面包屑导航
+    function updateBreadcrumb(path) {
+        const parts = path.split('/').filter(p => p !== '');
+        let breadcrumbHtml = '<li class="breadcrumb-item"><a href="#" onclick="loadFileList(\'/\')">根目录</a></li>';
+
+        let current = '';
+        parts.forEach((part, index) => {
+            current += '/' + part;
+            if (index === parts.length - 1) {
+                breadcrumbHtml += `<li class="breadcrumb-item active">${part}</li>`;
+            } else {
+                breadcrumbHtml += `<li class="breadcrumb-item"><a href="#" onclick="loadFileList('${current}')">${part}</a></li>`;
+            }
+        });
+
+        $('#pathBreadcrumb').html(breadcrumbHtml);
+    }
+
+    // 返回上级目录
+    function navigateUp() {
+        if (currentPath === '/') return;
+
+        const parts = currentPath.split('/').filter(p => p !== '');
+        parts.pop();
+        const newPath = '/' + parts.join('/');
+
+        loadFileList(newPath);
+    }
+
+    // 刷新文件列表
+    function refreshFileList() {
+        loadFileList(currentPath);
+    }
+
+    // 从文件列表下载文件
+    function downloadFileFromList(filePath) {
+        window.location.href = `/hdfs/download?filePath=${encodeURIComponent(filePath)}`;
+    }
+
+    // 格式化文件大小
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // 开始训练模型
+    function startTraining() {
+        const inputPath = $("#trainInput").val();
+        const outputPath = $("#trainOutput").val();
+
+        if (!inputPath || !outputPath) {
+            showError('#trainResult', '请输入输入路径和输出路径');
+            return;
+        }
+
+        // 显示进度条
+        $('#trainProgress').removeClass('d-none');
+        $('#trainResult').html('');
+
+        // 显示加载状态
+        $('#trainResult').html(`
+                <div class="alert alert-info alert-custom">
+                    <div class="d-flex align-items-center">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        <span>模型训练中，请稍候...</span>
+                    </div>
+                </div>
+            `);
+
+        // 发送训练请求
+        $.post('/hdfs/trainModel', {
+            inputFilePath: inputPath,
+            outPutFilePath: outputPath
+        }, function(response) {
+            if (response.code === 200) {
+                // 模拟进度更新
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += Math.floor(Math.random() * 10);
+                    if (progress >= 100) {
+                        progress = 100;
+                        clearInterval(interval);
+
+                        // 显示成功消息
+                        $('#trainResult').html(`
+                                <div class="alert alert-success alert-custom">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    ${response.msg}
+                                </div>
+                            `);
+                    }
+
+                    $('#progressPercent').text(`${progress}%`);
+                    $('#progressBar').css('width', `${progress}%`);
+                }, 500);
+            } else {
+                showError('#trainResult', `训练失败: ${response.msg}`);
+            }
+        }).fail(function() {
+            showError('#trainResult', '训练请求失败，请检查网络连接');
+        });
+    }
+
+    // 开始模型预测
+    function startPrediction() {
+        const modelPath = $("#modelPath").val();
+        const inputPath = $("#predictInput").val();
+        const outputPath = $("#predictOutput").val();
+
+        if (!modelPath || !inputPath || !outputPath) {
+            showError('#predictResult', '请填写所有必填字段');
+            return;
+        }
+
+        // 显示加载状态
+        $('#predictResult').html(`
+                <div class="alert alert-info alert-custom">
+                    <div class="d-flex align-items-center">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        <span>模型预测中，请稍候...</span>
+                    </div>
+                </div>
+            `);
+
+        // 发送预测请求
+        $.post('/hdfs/predictiveModels', {
+            modelPath: modelPath,
+            inputFilePath: inputPath,
+            outputFilePath: outputPath
+        }, function(response) {
+            if (response.code === 200) {
+                $('#predictResult').html(`
+                        <div class="alert alert-success alert-custom">
+                            <i class="fas fa-check-circle me-2"></i>
+                            ${response.msg} - 结果已保存到: ${outputPath}
+                        </div>
+                    `);
+            } else {
+                showError('#predictResult', `预测失败: ${response.msg}`);
+            }
+        }).fail(function() {
+            showError('#predictResult', '预测请求失败，请检查网络连接');
+        });
+    }
+
+    // 文件上传结果处理
+    $("#uploadForm").submit(function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        // 显示上传状态
+        $('#uploadResult').html(`
+                <div class="alert alert-info alert-custom">
+                    <div class="d-flex align-items-center">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        <span>文件上传中，请勿关闭页面...</span>
+                    </div>
+                </div>
+            `);
+
+        // 发送上传请求
+        $.ajax({
+            url: '/hdfs/upload',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.code === 200) {
+                    $('#uploadResult').html(`
+                            <div class="alert alert-success alert-custom">
+                                <i class="fas fa-check-circle me-2"></i>
+                                ${response.msg}
+                            </div>
+                        `);
+                    // 刷新文件列表
+                    refreshFileList();
+                } else {
+                    showError('#uploadResult', `上传失败: ${response.msg}`);
+                }
+            },
+            error: function() {
+                showError('#uploadResult', '上传请求失败，请检查网络连接');
+            }
+        });
+    });
+
+    // 显示错误信息
+    function showError(selector, message) {
+        $(selector).html(`
+                <div class="alert alert-danger alert-custom">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    ${message}
+                </div>
+            `);
+    }
+</script>
+</body>
+</html>
